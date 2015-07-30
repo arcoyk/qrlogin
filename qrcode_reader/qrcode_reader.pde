@@ -1,21 +1,19 @@
 import processing.video.*;
 import com.google.zxing.*;
 import java.awt.image.BufferedImage;
+import java.io.FileWriter;
+import java.io.*;
 import ddf.minim.*;
 
 Minim minim;
 AudioSample ping;
-
 Capture cam;
 com.google.zxing.Reader reader = new com.google.zxing.qrcode.QRCodeReader();
-
 PImage cover;
 String lastISBNAcquired = "";
-
 String msg = "Show QR code";
 String last = "";
-
-PrintWriter output;
+PrintWriter pw;
 
 void setup() {
   size(950, 540);
@@ -25,26 +23,12 @@ void setup() {
   }
   cam = new Capture(this, cams[3]);
   cam.start();
-  
   minim = new Minim(this);
   ping = minim.loadSample("pingpong.mp3", 512);
-  
-  output = createBufferedWriter("log.txt");
-  
   textSize(20);
   noStroke();
 }
 
-PrintWriter createBufferedWriter(String file) {
-  String[] lines = loadStrings(file);
-  PrintWriter output = createWriter(file + "2.txt");
-  for (int i = 0; i < lines.length; i++) {
-    output.println(lines[i]);
-    output.flush();
-  }
-  return output;
-}
-  
 
 void draw() {
   if (cam.available() == true) {
@@ -68,8 +52,7 @@ void draw() {
           ping.trigger();
           msg = result.getText();
           last = msg;
-          output.println(msg + "," + year() + "," + month() + "," + day() + "," + hour() + "," + minute() + "," + second());
-          output.flush();
+          appendText(msg + "," + year() + "," + month() + "," + day() + "," + hour() + "," + minute() + "," + second() + "\n");
        }
     } catch (Exception e) {
 //         println(e.toString()); 
@@ -88,4 +71,19 @@ void draw_text(String str) {
 void keyPressed() {
   int i = 0;
   int m = 1 / i;
+}
+
+void appendText(String text) {
+    try {
+    File file =new File("/users/kitayui/desktop/log.txt");
+    if (!file.exists()) {
+      file.createNewFile();
+    }
+    FileWriter fw = new FileWriter(file, true);
+    BufferedWriter bw = new BufferedWriter(fw);
+    PrintWriter pw = new PrintWriter(bw);
+    pw.write(text);
+    pw.close();
+  } catch(IOException e) {
+  }
 }
