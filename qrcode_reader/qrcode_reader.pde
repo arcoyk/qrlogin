@@ -4,16 +4,21 @@ import java.awt.image.BufferedImage;
 import java.io.FileWriter;
 import java.io.*;
 import ddf.minim.*;
+import gab.opencv.*;
+import java.awt.Rectangle;
 
+OpenCV opencv;
 Minim minim;
 AudioSample ping;
 Capture cam;
 com.google.zxing.Reader reader = new com.google.zxing.qrcode.QRCodeReader();
+
 PImage cover;
 String lastISBNAcquired = "";
 String msg = "Show QR code";
 String last = "";
 PrintWriter pw;
+PImage recent_face;
 
 void setup() {
   size(950, 540);
@@ -34,12 +39,20 @@ void draw() {
   if (cam.available() == true) {
     cam.read();
     image(cam, 0,0);
+    opencv = new OpenCV(this, cam);
+    opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);
+    // opencv.loadCascade(OpenCV.CASCADE_PEDESTRIAN);
+    Rectangle[] faces = opencv.detect();
+    if (recent_face != null) {
+      image(recent_face, 0, 40);
+    }
+    if (faces.length > 0) {
+      recent_face = get(faces[0].x, faces[0].y, faces[0].width, faces[0].height);
+    }
     try {
-       // Now test to see if it has a QR code embedded in it
        LuminanceSource source = new BufferedImageLuminanceSource((BufferedImage)cam.getImage());
        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));       
        Result result = reader.decode(bitmap);
-       //Once we get the results, we can do some display
        if (result.getText() != null && !result.getText().equals(last)) {
           println(result.getText());
           ResultPoint[] points = result.getResultPoints();
@@ -53,9 +66,9 @@ void draw() {
           msg = result.getText();
           last = msg;
           appendText(msg + "," + year() + "," + month() + "," + day() + "," + hour() + "," + minute() + "," + second() + "\n");
+          recent_face.save("/users/kitayui/desktop/imgs/" + msg + "_" + year() + "_" + month() + "_" + day() + "_" + hour() + "_" + minute() + "_" + second() + ".png");
        }
     } catch (Exception e) {
-//         println(e.toString()); 
     }
   }
   draw_text(msg);
