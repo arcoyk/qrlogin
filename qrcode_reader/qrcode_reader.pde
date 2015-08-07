@@ -21,15 +21,15 @@ PrintWriter pw;
 PImage recent_face;
 
 void setup() {
-  size(950, 540);
+  size(960, 540);
   String[] cams = Capture.list();
-  for (String cam : cams) {
-    println(cam);
+  for (int i = 0; i < cams.length; i++) {
+    println(i + "" + cams[i]);
   }
-  cam = new Capture(this, cams[3]);
+  cam = new Capture(this, cams[18]);
   cam.start();
   minim = new Minim(this);
-  ping = minim.loadSample("pingpong.mp3", 512);
+  ping = minim.loadSample("pi.mp3", 512);
   textSize(20);
   noStroke();
 }
@@ -47,7 +47,11 @@ void draw() {
       image(recent_face, 0, 40);
     }
     if (faces.length > 0) {
-      recent_face = get(faces[0].x, faces[0].y, faces[0].width, faces[0].height);
+      for (int i = 0; i < faces.length; i++) {
+        if (faces[i].width > 150 && faces[i].height > 150) {
+          recent_face = get(faces[0].x, faces[0].y, faces[0].width, faces[0].height);
+        }
+      }
     }
     try {
        LuminanceSource source = new BufferedImageLuminanceSource((BufferedImage)cam.getImage());
@@ -66,7 +70,7 @@ void draw() {
           msg = result.getText();
           last = msg;
           appendText(msg + "," + year() + "," + month() + "," + day() + "," + hour() + "," + minute() + "," + second() + "\n");
-          recent_face.save("/users/kitayui/desktop/imgs/" + msg + "_" + year() + "_" + month() + "_" + day() + "_" + hour() + "_" + minute() + "_" + second() + ".png");
+          recent_face.save("/users/techpc1/desktop/imgs/" + msg + "_" + year() + "_" + month() + "_" + day() + "_" + hour() + "_" + minute() + "_" + second() + ".png");
        }
     } catch (Exception e) {
     }
@@ -88,7 +92,7 @@ void keyPressed() {
 
 void appendText(String text) {
     try {
-    File file =new File("/users/kitayui/desktop/log.txt");
+    File file =new File("/users/techpc1/desktop/log.txt");
     if (!file.exists()) {
       file.createNewFile();
     }
